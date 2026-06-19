@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: test
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: patroni-etcd
+  namespace: test
+  annotations:
+    service.cilium.io/global: "true"
+spec:
+  ports:
+    - name: client
+      port: 2379
+      targetPort: 2379
+

@@ -1,0 +1,15 @@
+apiVersion: acid.zalan.do/v1
+kind: postgresql
+metadata:
+  name: test
+  namespace: test
+spec:
+  teamId: test
+  numberOfInstances: 1
+  volume:
+    size: 1Gi
+  postgresql:
+    version: "17"
+  env:
+    - name: PATRONI_NAME
+      value: test-c2-0

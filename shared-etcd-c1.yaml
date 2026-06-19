@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: test
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: patroni-etcd
+  namespace: test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: patroni-etcd
+  template:
+    metadata:
+      labels:
+        app: patroni-etcd
+    spec:
+      containers:
+        - name: etcd
+          image: registry.k8s.io/etcd:3.5.21-0
+          command:
+            - /usr/local/bin/etcd
+          args:
+            - --name=patroni-etcd
+            - --enable-v2=true
+            - --data-dir=/var/lib/etcd
+            - --listen-client-urls=http://0.0.0.0:2379
+            - --advertise-client-urls=http://patroni-etcd.test.svc.cluster.local:2379
+            - --listen-peer-urls=http://127.0.0.1:2380
+            - --initial-advertise-peer-urls=http://127.0.0.1:2380
+            - --initial-cluster=patroni-etcd=http://127.0.0.1:2380
+            - --initial-cluster-state=new
+          ports:
+            - name: client
+              containerPort: 2379
+          readinessProbe:
+            tcpSocket:
+              port: client
+            periodSeconds: 2
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/etcd
+      volumes:
+        - name: data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: patroni-etcd
+  namespace: test
+  annotations:
+    service.cilium.io/global: "true"
+spec:
+  selector:
+    app: patroni-etcd
+  ports:
+    - name: client
+      port: 2379
+      targetPort: client

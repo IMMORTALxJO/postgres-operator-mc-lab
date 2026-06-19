@@ -1,0 +1,19 @@
+apiVersion: acid.zalan.do/v1
+kind: postgresql
+metadata:
+  name: test-c1
+  namespace: test
+spec:
+  teamId: test
+  postgresql:
+    version: "17"
+  numberOfInstances: 1
+  volume:
+    size: 1Gi
+  users:
+    zalandos: []
+  preparedDatabases:
+    zalandos: {}
+  env:
+    - name: SCOPE
+      value: test
